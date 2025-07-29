@@ -1,18 +1,24 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { fetchVideos } from "../utils/api";
+import { setVideos } from "../features/videos/videosSlice";
 import styles from "../styles/HomeFeed.module.css";
+import { Link } from "react-router-dom";
+import type { AppDispatch, RootState } from "../store/store";
 
 export const HomeFeed = () => {
-  const [videos, setVideos] = useState<any[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const videos = useSelector((state: RootState) => state.videos.videos);
 
   useEffect(() => {
-    const loadVideos = async () => {
-      const res = await fetchVideos();
-      setVideos(res);
-    };
-    loadVideos();
-  }, []);
+    if (videos.length === 0) {
+      const loadVideos = async () => {
+        const res = await fetchVideos();
+        dispatch(setVideos(res));
+      };
+      loadVideos();
+    }
+  }, [dispatch, videos]);
 
   return (
     <div className={styles.container}>
@@ -20,11 +26,7 @@ export const HomeFeed = () => {
       <div className={styles.grid}>
         {videos.map((video) => (
           <Link key={video.id} to={`/shorts/${video.id}`} className={styles.card}>
-            <video
-              src={video.videoUrl}
-              muted
-              className={styles.thumbnail}
-            />
+            <video src={video.videoUrl} muted className={styles.thumbnail} />
             <div className={styles.details}>
               <h4 className={styles.title}>{video.title}</h4>
               <p className={styles.creator}>{video.creator.name}</p>
