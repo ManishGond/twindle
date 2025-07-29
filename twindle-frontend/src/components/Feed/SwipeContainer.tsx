@@ -1,27 +1,53 @@
-// components/Feed/VerticalFeed.tsx
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { mockVideos } from "../../utils/data";
 import { VideoCard } from "./VideoCard";
 import { ActionButtons } from "../buttons/ActionButtons";
 import { VideoSwipeButtons } from "../buttons/VideoSwipeButtons";
+import { fetchVideos } from "../../utils/api";
+import type { Video } from "../../utils/data";
+import styles from '../../styles/SwipeContainer.module.css'
 
 export const SwipeContainer = () => {
+  const [videos, setVideos] = useState<Video[]>([]);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<"up" | "down">("up");
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const touchStartY = useRef<number | null>(null);
   const touchEndY = useRef<number | null>(null);
 
+  useEffect(() => {
+    fetchInitialVideos();
+  }, []);
+
+  const fetchInitialVideos = async () => {
+    setIsFetching(true);
+    const res = await fetchVideos(null);
+    setVideos(res.videos);
+    setCursor(res.nextCursor);
+    setIsFetching(false);
+  };
+
+  const fetchMoreVideos = async () => {
+    if (isFetching || !cursor) return;
+    setIsFetching(true);
+    const res = await fetchVideos(cursor);
+    setVideos((prev) => [...prev, ...res.videos]);
+    setCursor(res.nextCursor);
+    setIsFetching(false);
+  };
+
   const changeIndex = (dir: "up" | "down") => {
     setDirection(dir);
     setIndex((prev) => {
-      if (dir === "up") return (prev + 1) % mockVideos.length;
-      return prev === 0 ? mockVideos.length - 1 : prev - 1;
+      const newIndex = dir === "up" ? prev + 1 : prev - 1;
+      return Math.max(0, Math.min(videos.length - 1, newIndex));
     });
   };
 
-  // Auto-play current video and pause others
+  // Pause all videos except current
   useEffect(() => {
     videoRefs.current.forEach((video, i) => {
       if (video) {
@@ -29,29 +55,14 @@ export const SwipeContainer = () => {
         else video.pause();
       }
     });
+
+    // 👇 Trigger lazy load when 2 from end
+    if (videos.length - index <= 3) {
+      fetchMoreVideos();
+    }
   }, [index]);
 
-  // Wheel scroll
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (e.deltaY > 50) changeIndex("up");
-      else if (e.deltaY < -50) changeIndex("down");
-    };
-    window.addEventListener("wheel", handleWheel);
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, []);
-
-  // Keyboard arrow keys
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") changeIndex("up");
-      else if (e.key === "ArrowUp") changeIndex("down");
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, []);
-
-  // Touch gestures (mobile)
+  // Swipe detection handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
   };
@@ -76,6 +87,10 @@ export const SwipeContainer = () => {
       opacity: 0,
     }),
   };
+
+  if (!videos?.length) {
+    return <div className={styles.loading}>Loading videos...</div>;
+  }
 
   return (
     <div
@@ -110,13 +125,13 @@ export const SwipeContainer = () => {
           />
           <VideoCard
             ref={(el) => {
-              videoRefs.current[index] = el;
+              videoRefs.current[index] = el
             }}
-            video={mockVideos[index]}
+            video={videos[index]}
           />
           <ActionButtons
-            likes={mockVideos[index].likes}
-            comments={mockVideos[index].comments}
+            likes={videos[index].likes}
+            comments={videos[index].comments}
           />
         </motion.div>
       </AnimatePresence>

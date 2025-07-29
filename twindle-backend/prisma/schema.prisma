@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String
+  email    String  @unique
+  password String
+  avatar   String
+  bio      String?
+
+  // Relations
+  videos    Video[]    @relation("CreatorVideos")
+  curated   Curation[]
+  followers Follow[]   @relation("UserFollowers_followed")
+  following Follow[]   @relation("UserFollowers_follower")
+  roles     UserRole[]
+
+  // Badges
+  isCreator Boolean @default(false)
+  isCurator Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Video {
+  id       String @id @default(uuid())
+  videoUrl String
+  title    String
+  likes    Int    @default(0)
+  comments Int    @default(0)
+
+  // Creator
+  creatorId String
+  creator   User   @relation("CreatorVideos", fields: [creatorId], references: [id])
+
+  // Tags and Curation
+  tags      VideoTag[]
+  curations Curation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VideoTag {
+  id      String @id @default(uuid())
+  tag     String
+  videoId String
+  video   Video  @relation(fields: [videoId], references: [id])
+}
+
+model Curation {
+  id        String @id @default(uuid())
+  curatorId String
+  videoId   String
+
+  curator   User     @relation(fields: [curatorId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Follow {
+  id         String @id @default(uuid())
+  followerId String
+  followedId String
+
+  follower User @relation("UserFollowers_follower", fields: [followerId], references: [id])
+  followed User @relation("UserFollowers_followed", fields: [followedId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model UserRole {
+  id     String @id @default(uuid())
+  userId String
+  role   Role
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  CREATOR
+  CURATOR
+  ADMIN
+}

@@ -1,0 +1,9 @@
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Fill the screen */
+  font-size: 1rem;
+  color: #888;
+  background-color: #000; /* optional: dark background while videos load */
+}

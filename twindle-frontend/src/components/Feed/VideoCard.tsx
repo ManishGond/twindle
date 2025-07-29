@@ -1,5 +1,4 @@
-// components/Feed/VideoCard.tsx
-import { useState, forwardRef } from "react";
+import { useState, forwardRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "../../styles/VideoCard.module.css";
 import { VideoInfo } from "./VideoInfo";
@@ -17,6 +16,7 @@ export const VideoCard = forwardRef<HTMLVideoElement, Props>(
   ({ video }, ref) => {
     const [isPaused, setIsPaused] = useState(false);
     const [showIcon, setShowIcon] = useState(false);
+    const [volume, setVolume] = useState(1); // 0 to 1
 
     const handleTogglePlay = (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
@@ -35,6 +35,14 @@ export const VideoCard = forwardRef<HTMLVideoElement, Props>(
       setTimeout(() => setShowIcon(false), 1000);
     };
 
+    useEffect(() => {
+      const videoEl = ref as React.MutableRefObject<HTMLVideoElement | null>;
+      if (videoEl?.current) {
+        videoEl.current.volume = volume;
+        videoEl.current.muted = volume === 0;
+      }
+    }, [volume, ref]);
+
     return (
       <div className={styles.card} onClick={handleTogglePlay}>
         <video
@@ -43,12 +51,24 @@ export const VideoCard = forwardRef<HTMLVideoElement, Props>(
           src={video.videoUrl}
           autoPlay
           loop
-          muted
+          muted={volume === 0}
           playsInline
         />
         <div className={styles.overlay}>
           <VideoInfo video={video} />
         </div>
+
+        {/* 🔊 Volume Slider */}
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={volume}
+          onChange={(e) => setVolume(parseFloat(e.target.value))}
+          className={styles.volumeSlider}
+        />
+
         <AnimatePresence>
           {showIcon && (
             <motion.div
