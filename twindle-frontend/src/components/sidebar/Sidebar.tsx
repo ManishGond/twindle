@@ -29,10 +29,10 @@ export const Sidebar = () => {
           </button>
         </div>
         <div>
-          <button className={styles.sidebarItem}>
+          <Link to="/upload" className={styles.sidebarItem}>
             <RiDashboard2Line size={18} />
             <span>Upload</span>
-          </button>
+          </Link>
         </div>
       </div>
     </div>

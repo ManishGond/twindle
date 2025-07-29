@@ -12,3 +12,18 @@ export const fetchVideos = async (): Promise<Video[]> => {
     return [];
   }
 };
+
+export const uploadVideo = async (formData: FormData, token: string) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/api/videos/upload`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to upload video:", error);
+    throw error;
+  }
+};

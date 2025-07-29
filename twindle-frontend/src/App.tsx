@@ -3,6 +3,7 @@ import { Layout } from "./layout/Layout";
 import { ShortsFeed } from "./pages/ShortsFeed";
 import { HomeFeed } from "./pages/HomeFeed";
 import "./styles/App.module.css";
+import UploadVideo from "./pages/UploadVideo";
 
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
           <Route index element={<HomeFeed />} />
           <Route path="/shorts" element={<ShortsFeed />} />
           <Route path="/shorts/:id" element={<ShortsFeed />} />
+          <Route path="/upload" element={<UploadVideo />} />
         </Route>
       </Routes>
     </BrowserRouter>
