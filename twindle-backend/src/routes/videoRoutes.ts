@@ -1,12 +1,11 @@
 import express from "express";
 import multer from "multer";
+import { authenticate } from "../middleware/auth";
 import { uploadVideo } from "../controller/videoController";
 
-const videoRoutes = express.Router()
+const videoRouter = express.Router();
+const upload = multer(); // Handles multipart form-data
 
-const storage = multer.memoryStorage()
-const upload = multer({storage})
+videoRouter.post("/upload", authenticate, upload.single("video"), uploadVideo);
 
-videoRoutes.post("/upload", upload.single("video"), uploadVideo);
-
-export default videoRoutes;
+export default videoRouter;
