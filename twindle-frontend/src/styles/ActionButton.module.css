@@ -1,0 +1,58 @@
+/* styles/ActionButton.module.css */
+
+.actions {
+  position: absolute;
+  top: 50%;
+  right: 360px; /* ✅ Use positive value to keep it visible */
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.actions button {
+  background-color: rgba(0, 0, 0, 0.6); /* semi-transparent black */
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 14px;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(67, 67, 67, 0.4);
+}
+
+.actions button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.actions button span {
+  position: absolute;
+  top: 100%;
+  font-size: 12px;
+  margin-top: 6px;
+  color: #fff;
+  text-align: center;
+  width: max-content;
+  white-space: nowrap;
+}
+
+.actions button svg {
+  font-size: 24px;
+  color: white;
+}
+
+.actions button.active {
+  background-color: #ff2050;
+  border-color: #ff2050;
+}
+

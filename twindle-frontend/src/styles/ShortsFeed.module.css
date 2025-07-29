@@ -1,0 +1,11 @@
+/* styles/ShortsFeed.module.css */
+
+.feedWrapper {
+  height: 100vh;
+  width: 80vw;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}

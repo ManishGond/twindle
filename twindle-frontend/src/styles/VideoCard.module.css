@@ -1,0 +1,43 @@
+/* styles/VideoCard.module.css */
+
+.card {
+  width: 360px;
+  height: 640px;
+  position: relative;
+  background-color: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto; /* Center horizontally */
+}
+
+.video {
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.playIcon {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  color: #000;
+  pointer-events: none;
+}
+
