@@ -1,5 +1,3 @@
-// VideoCard.tsx
-
 import { useState, forwardRef, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "../../styles/VideoCard.module.css";
@@ -15,36 +13,39 @@ type Props = {
   isActive?: boolean;
 };
 
-
 export const VideoCard = forwardRef<HTMLVideoElement, Props>(
   ({ video, isActive }, ref) => {
     const [isPaused, setIsPaused] = useState(false);
     const [showIcon, setShowIcon] = useState(false);
-    const [volume, setVolume] = useState(1); // 0 to 1
+    const [volume, setVolume] = useState(1);
+    const [loading, setLoading] = useState(true);
 
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
-    // Merge internal ref and forwarded ref
+    // Attach internal ref to parent ref
     useEffect(() => {
       if (ref && typeof ref === "object" && ref !== null) {
-        (ref as React.MutableRefObject<HTMLVideoElement | null>).current = videoRef.current;
+        (ref as React.MutableRefObject<HTMLVideoElement | null>).current =
+          videoRef.current;
       }
     }, [ref]);
 
-    // Play/pause based on isActive
+    // Auto-play when active and ready
     useEffect(() => {
       if (!videoRef.current) return;
 
       if (isActive) {
-        videoRef.current.play().catch(() => { });
-        setIsPaused(false);
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => setIsPaused(false)).catch(() => { });
+        }
       } else {
         videoRef.current.pause();
         setIsPaused(true);
       }
     }, [isActive]);
 
-    // Update volume
+    // Set volume/mute
     useEffect(() => {
       if (videoRef.current) {
         videoRef.current.volume = volume;
@@ -52,6 +53,12 @@ export const VideoCard = forwardRef<HTMLVideoElement, Props>(
       }
     }, [volume]);
 
+    // Spinner until video is ready
+    const handleCanPlay = () => {
+      setLoading(false);
+    };
+
+    // Tap to play/pause
     const handleTogglePlay = (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
       const videoElement = videoRef.current;
@@ -71,20 +78,27 @@ export const VideoCard = forwardRef<HTMLVideoElement, Props>(
 
     return (
       <div className={styles.card} onClick={handleTogglePlay}>
+        {loading && (
+          <div className={styles.spinnerWrapper}>
+            <div className={styles.spinner} />
+          </div>
+        )}
+
         <video
           ref={videoRef}
           className={styles.video}
           src={video.videoUrl}
           autoPlay
           loop
-          muted={volume === 0}
           playsInline
+          muted={volume === 0}
+          onCanPlay={handleCanPlay}
         />
+
         <div className={styles.overlay}>
           <VideoInfo video={video} />
         </div>
 
-        {/* 🔊 Volume Slider */}
         <input
           type="range"
           min={0}

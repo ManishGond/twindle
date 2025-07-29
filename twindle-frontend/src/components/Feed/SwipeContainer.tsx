@@ -14,8 +14,9 @@ const SwipeContainer = ({ startVideoId }: Props) => {
   const currentVideoRef = useRef<HTMLVideoElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // Set initial active index on mount
   useEffect(() => {
-    if (startVideoId) {
+    if (startVideoId && videos.length) {
       const index = videos.findIndex((v) => v.id === startVideoId);
       if (index !== -1) {
         setActiveIndex(index);
@@ -66,23 +67,29 @@ const SwipeContainer = ({ startVideoId }: Props) => {
           }}
         >
           {idx === activeIndex && (
-            <VideoSwipeButtons
-              onNext={goToNext}
-              onPrevious={goToPrevious}
-              disablePrevious={activeIndex === 0}
-            />
+            <>
+              <VideoSwipeButtons
+                onNext={goToNext}
+                onPrevious={goToPrevious}
+                disablePrevious={activeIndex === 0}
+              />
+              <ActionButtons
+                likes={
+                  typeof video.likes === "number"
+                    ? video.likes
+                    : Array.isArray(video.likes)
+                      ? video.likes
+                      : 0
+                }
+                comments={Array.isArray(video.comments) ? video.comments.length : 0}
+              />
+            </>
           )}
           <VideoCard
             video={video}
             isActive={idx === activeIndex}
             ref={idx === activeIndex ? currentVideoRef : null}
           />
-          {idx === activeIndex && (
-            <ActionButtons
-              likes={typeof video.likes === "number" ? video.likes : 0}
-              comments={Array.isArray(video.comments) ? video.comments.length : 0}
-            />
-          )}
         </div>
       ))}
     </div>
