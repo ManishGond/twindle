@@ -9,6 +9,7 @@ import { VideoSwipeButtons } from "../buttons/VideoSwipeButtons";
 export const SwipeContainer = () => {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<"up" | "down">("up");
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const touchStartY = useRef<number | null>(null);
   const touchEndY = useRef<number | null>(null);
 
@@ -20,7 +21,17 @@ export const SwipeContainer = () => {
     });
   };
 
-  // Mouse wheel
+  // Auto-play current video and pause others
+  useEffect(() => {
+    videoRefs.current.forEach((video, i) => {
+      if (video) {
+        if (i === index) video.play().catch(() => { });
+        else video.pause();
+      }
+    });
+  }, [index]);
+
+  // Wheel scroll
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (e.deltaY > 50) changeIndex("up");
@@ -30,7 +41,7 @@ export const SwipeContainer = () => {
     return () => window.removeEventListener("wheel", handleWheel);
   }, []);
 
-  // Arrow keys
+  // Keyboard arrow keys
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown") changeIndex("up");
@@ -40,7 +51,7 @@ export const SwipeContainer = () => {
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
-  // Touch swipe
+  // Touch gestures (mobile)
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
   };
@@ -97,7 +108,12 @@ export const SwipeContainer = () => {
             onNext={() => changeIndex("up")}
             onPrevious={() => changeIndex("down")}
           />
-          <VideoCard video={mockVideos[index]} />
+          <VideoCard
+            ref={(el) => {
+              videoRefs.current[index] = el;
+            }}
+            video={mockVideos[index]}
+          />
           <ActionButtons
             likes={mockVideos[index].likes}
             comments={mockVideos[index].comments}
