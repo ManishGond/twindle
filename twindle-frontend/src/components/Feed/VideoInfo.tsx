@@ -1,5 +1,3 @@
-// VideoInfo.tsx
-
 import { useState } from "react";
 import styles from "../../styles/VideoInfo.module.css";
 import type { Video } from "../../utils/data";
@@ -14,9 +12,18 @@ export const VideoInfo = ({ video }: { video: Video }) => {
     // TODO: Call follow/unfollow API
   };
 
+  const avatarUrl =
+    video.creator?.avatar && video.creator.avatar !== ""
+      ? `http://localhost:5000/uploads/${video.creator.avatar}`
+      : "defaultAvatar";
+
   return (
     <div className={styles.info}>
-      <img src={video.creator.avatar} alt="creator" />
+      <img
+        src={avatarUrl}
+        alt={video.creator.name}
+        className={styles.avatar}
+      />
       <div>
         <p className={styles.name}>@{video.creator.name}</p>
         <p className={styles.title}>{video.title}</p>

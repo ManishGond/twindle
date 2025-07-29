@@ -32,3 +32,12 @@
   border-radius: 20px;
   cursor: pointer;
 }
+
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+

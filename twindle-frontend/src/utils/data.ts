@@ -1,14 +1,14 @@
-// /utils/data.ts
 export type Video = {
   id: string;
   videoUrl: string;
   title: string;
   tags: string[];
-  likes: number;       // if not implemented yet, set to 0 in backend
-  comments: number;    // if not implemented yet, set to 0 in backend
+  likes: number;
+  dislikes: number;
+  comments: string[];
   creator: {
     name: string;
-    avatar?: string;    // optional for now
-    followers?: number; // optional for now
+    avatar?: string;
+    followers?: number;
   };
 };

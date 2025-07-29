@@ -1,4 +1,3 @@
-// /components/Feed/SwipeContainer.tsx
 import { useEffect, useRef, useState } from "react";
 import { useVideoFeed } from "../../hooks/useVideoFeed";
 import { VideoCard } from "./VideoCard";
@@ -29,44 +28,29 @@ const SwipeContainer = ({ startVideoId }: Props) => {
     }
   }, [startVideoId, videos]);
 
-  const handleScroll = () => {
-    const container = containerRef.current;
-    if (!container) return;
-    const scrollTop = container.scrollTop;
-    const containerHeight = container.clientHeight;
-    const newIndex = Math.round(scrollTop / containerHeight);
-    if (newIndex !== activeIndex) {
-      setActiveIndex(newIndex);
-    }
-  };
-
-  const handleNext = () => {
+  const goToNext = () => {
     if (activeIndex < videos.length - 1) {
-      const nextIndex = activeIndex + 1;
-      scrollToIndex(nextIndex);
+      setActiveIndex((prev) => prev + 1);
+      containerRef.current?.scrollTo({
+        top: (activeIndex + 1) * window.innerHeight,
+        behavior: "smooth",
+      });
     }
   };
 
-  const handlePrevious = () => {
+  const goToPrevious = () => {
     if (activeIndex > 0) {
-      const prevIndex = activeIndex - 1;
-      scrollToIndex(prevIndex);
-    }
-  };
-
-  const scrollToIndex = (index: number) => {
-    const container = containerRef.current;
-    if (container) {
-      const videoHeight = container.clientHeight;
-      container.scrollTo({ top: index * videoHeight, behavior: "smooth" });
-      setActiveIndex(index);
+      setActiveIndex((prev) => prev - 1);
+      containerRef.current?.scrollTo({
+        top: (activeIndex - 1) * window.innerHeight,
+        behavior: "smooth",
+      });
     }
   };
 
   return (
     <div
       ref={containerRef}
-      onScroll={handleScroll}
       style={{
         height: "100vh",
         overflowY: "scroll",
@@ -79,18 +63,26 @@ const SwipeContainer = ({ startVideoId }: Props) => {
           style={{
             height: "100vh",
             scrollSnapAlign: "start",
-            position: "relative", // needed to absolutely position buttons
           }}
         >
-          <VideoSwipeButtons onNext={handleNext} onPrevious={handlePrevious} />
-          {/* Video UI */}
+          {idx === activeIndex && (
+            <VideoSwipeButtons
+              onNext={goToNext}
+              onPrevious={goToPrevious}
+              disablePrevious={activeIndex === 0}
+            />
+          )}
           <VideoCard
             video={video}
             isActive={idx === activeIndex}
             ref={idx === activeIndex ? currentVideoRef : null}
           />
-
-          <ActionButtons likes={video.likes} comments={video.comments} />
+          {idx === activeIndex && (
+            <ActionButtons
+              likes={typeof video.likes === "number" ? video.likes : 0}
+              comments={Array.isArray(video.comments) ? video.comments.length : 0}
+            />
+          )}
         </div>
       ))}
     </div>

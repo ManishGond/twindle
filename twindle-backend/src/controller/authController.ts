@@ -9,6 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
 export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, isCreator, isCurator } = req.body;
+  const avatar = req.file?.filename || null;
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -23,7 +24,7 @@ export const registerUser = async (req: Request, res: Response) => {
         name,
         email,
         password: hashedPassword,
-        avatar: "",
+        avatar,
         isCreator: !!isCreator,
         isCurator: !!isCurator,
         roles: {

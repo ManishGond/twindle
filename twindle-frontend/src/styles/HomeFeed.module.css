@@ -1,33 +1,56 @@
-/* styles/HomeFeed.module.css */
+.container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto; /* centers the grid */
+}
+
+.heading {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: white;
+}
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* match thumbnail width */
   gap: 16px;
-  padding: 16px;
+  justify-content: center;
 }
 
 .card {
-  cursor: pointer;
+  width: 300px;
   background: #111;
   border-radius: 12px;
   overflow: hidden;
+  text-decoration: none;
   transition: transform 0.2s ease;
+  border: 1px solid #333;
 }
 
 .card:hover {
-  transform: scale(1.03);
+  transform: scale(1.02);
 }
 
 .thumbnail {
-  width: 100%;
-  height: 240px;
+  width: 340px;
+  height: 140px;
   object-fit: cover;
   display: block;
+  background-color: #000;
+}
+
+.details {
+  padding: 0.5rem 0.75rem;
 }
 
 .title {
   color: #fff;
+  font-size: 16px;
+  margin: 0;
+}
+
+.creator {
+  color: #aaa;
   font-size: 14px;
-  padding: 8px;
+  margin: 4px 0 0;
 }

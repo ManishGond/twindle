@@ -14,6 +14,7 @@ app.use(express.json());
 // Routes
 app.use("/api/videos", videoRoutes);
 app.use("/api/auth", authLimiter, authRoutes)
+app.use("/uploads", express.static("uploads"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

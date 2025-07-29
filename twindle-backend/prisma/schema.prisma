@@ -12,7 +12,7 @@ model User {
   name     String
   email    String  @unique
   password String
-  avatar   String
+  avatar   String?
   bio      String?
 
   // Relations
@@ -26,8 +26,9 @@ model User {
   isCreator Boolean @default(false)
   isCurator Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Comment   Comment[]
 }
 
 model Video {
@@ -35,18 +36,29 @@ model Video {
   videoUrl String
   title    String
   likes    Int    @default(0)
-  comments Int    @default(0)
+  dislikes Int    @default(0)
 
-  // Creator
+  // Relations
   creatorId String
-  creator   User   @relation("CreatorVideos", fields: [creatorId], references: [id])
-
-  // Tags and Curation
+  creator   User       @relation("CreatorVideos", fields: [creatorId], references: [id])
   tags      VideoTag[]
   curations Curation[]
+  comments  Comment[] // ✅ valid relation now
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id       String @id @default(uuid())
+  text     String
+  authorId String
+  videoId  String
+
+  author User  @relation(fields: [authorId], references: [id])
+  video  Video @relation(fields: [videoId], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 model VideoTag {
