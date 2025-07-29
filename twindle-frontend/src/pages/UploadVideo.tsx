@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import styles from "../styles/UploadVideo.module.css";
 import { uploadVideo } from "../utils/api";
+import { getAuth } from "../utils/auth";
 
 const UploadVideo = () => {
   const [title, setTitle] = useState("");
@@ -27,7 +28,9 @@ const UploadVideo = () => {
       return;
     }
 
-    const token = localStorage.getItem("token");
+    const auth = getAuth();
+    const token = auth?.token;
+
     if (!token) {
       setMessage("❌ Please login to upload.");
       return;
