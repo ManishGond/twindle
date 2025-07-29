@@ -1,3 +1,5 @@
+// Sidebar.tsx
+
 import { Link } from "react-router-dom";
 import styles from "../../styles/Sidebar.module.css";
 import { FaHome, FaHistory, FaThumbsUp } from "react-icons/fa";

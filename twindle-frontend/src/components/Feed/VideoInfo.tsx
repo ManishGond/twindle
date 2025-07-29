@@ -1,3 +1,5 @@
+// VideoInfo.tsx
+
 import { useState } from "react";
 import styles from "../../styles/VideoInfo.module.css";
 import type { Video } from "../../utils/data";

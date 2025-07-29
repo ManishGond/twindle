@@ -1,10 +1,9 @@
-import { SwipeContainer } from "../components/Feed/SwipeContainer";
-import styles from "../styles/ShortsFeed.module.css";
+// /pages/ShortsFeed.tsx
+import { useParams } from "react-router-dom";
+import SwipeContainer from "../components/Feed/SwipeContainer";
 
 export const ShortsFeed = () => {
-  return (
-    <div className={styles.feedWrapper}>
-      <SwipeContainer />
-    </div>
-  );
+  const { id } = useParams();
+
+  return <SwipeContainer startVideoId={id} />;
 };

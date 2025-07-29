@@ -1,21 +1,33 @@
+// /pages/HomeFeed.tsx
 import { useEffect, useState } from "react";
-// import { fetchAllVideos } from "../utils/api"; // hypothetical function
-import type { Video } from "../utils/data";
-import { VideoCard } from "../components/Feed/VideoCard";
+import { Link } from "react-router-dom";
+import { fetchVideos } from "../utils/api";
 
 export const HomeFeed = () => {
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
 
   useEffect(() => {
-    // fetchAllVideos().then(setVideos);
+    const loadVideos = async () => {
+      const res = await fetchVideos();
+      setVideos(res);
+    };
+    loadVideos();
   }, []);
 
   return (
     <div style={{ padding: "1rem" }}>
-      <h2 style={{ color: "white", marginBottom: "1rem" }}>All Videos</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <h2>For you page</h2>
+      <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
         {videos.map((video) => (
-          <VideoCard key={video.id} video={video} />
+          <Link key={video.id} to={`/shorts/${video.id}`}>
+            <div style={{ border: "1px solid #ccc", borderRadius: "10px", overflow: "hidden" }}>
+              <video src={video.videoUrl} muted width="100%" height="auto" style={{ objectFit: "cover" }} />
+              <div style={{ padding: "0.5rem" }}>
+                <h4>{video.title}</h4>
+                <p>{video.creator.name}</p>
+              </div>
+            </div>
+          </Link>
         ))}
       </div>
     </div>

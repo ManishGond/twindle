@@ -1,0 +1,33 @@
+/* styles/HomeFeed.module.css */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.card {
+  cursor: pointer;
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.03);
+}
+
+.thumbnail {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+.title {
+  color: #fff;
+  font-size: 14px;
+  padding: 8px;
+}

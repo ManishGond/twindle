@@ -1,140 +1,100 @@
+// /components/Feed/SwipeContainer.tsx
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useVideoFeed } from "../../hooks/useVideoFeed";
 import { VideoCard } from "./VideoCard";
-import { ActionButtons } from "../buttons/ActionButtons";
 import { VideoSwipeButtons } from "../buttons/VideoSwipeButtons";
-import { fetchVideos } from "../../utils/api";
-import type { Video } from "../../utils/data";
-import styles from '../../styles/SwipeContainer.module.css'
+import { ActionButtons } from "../buttons/ActionButtons";
 
-export const SwipeContainer = () => {
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState<"up" | "down">("up");
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
+type Props = {
+  startVideoId?: string;
+};
 
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const touchStartY = useRef<number | null>(null);
-  const touchEndY = useRef<number | null>(null);
+const SwipeContainer = ({ startVideoId }: Props) => {
+  const { videos } = useVideoFeed();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const currentVideoRef = useRef<HTMLVideoElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    fetchInitialVideos();
-  }, []);
-
-  const fetchInitialVideos = async () => {
-    setIsFetching(true);
-    const res = await fetchVideos(null);
-    setVideos(res.videos);
-    setCursor(res.nextCursor);
-    setIsFetching(false);
-  };
-
-  const fetchMoreVideos = async () => {
-    if (isFetching || !cursor) return;
-    setIsFetching(true);
-    const res = await fetchVideos(cursor);
-    setVideos((prev) => [...prev, ...res.videos]);
-    setCursor(res.nextCursor);
-    setIsFetching(false);
-  };
-
-  const changeIndex = (dir: "up" | "down") => {
-    setDirection(dir);
-    setIndex((prev) => {
-      const newIndex = dir === "up" ? prev + 1 : prev - 1;
-      return Math.max(0, Math.min(videos.length - 1, newIndex));
-    });
-  };
-
-  // Pause all videos except current
-  useEffect(() => {
-    videoRefs.current.forEach((video, i) => {
-      if (video) {
-        if (i === index) video.play().catch(() => { });
-        else video.pause();
+    if (startVideoId) {
+      const index = videos.findIndex((v) => v.id === startVideoId);
+      if (index !== -1) {
+        setActiveIndex(index);
+        const container = containerRef.current;
+        if (container) {
+          const videoHeight = container.clientHeight;
+          container.scrollTo({ top: index * videoHeight, behavior: "auto" });
+        }
       }
-    });
-
-    // 👇 Trigger lazy load when 2 from end
-    if (videos.length - index <= 3) {
-      fetchMoreVideos();
     }
-  }, [index]);
+  }, [startVideoId, videos]);
 
-  // Swipe detection handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const scrollTop = container.scrollTop;
+    const containerHeight = container.clientHeight;
+    const newIndex = Math.round(scrollTop / containerHeight);
+    if (newIndex !== activeIndex) {
+      setActiveIndex(newIndex);
+    }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    touchEndY.current = e.changedTouches[0].clientY;
-    if (!touchStartY.current || !touchEndY.current) return;
-
-    const delta = touchStartY.current - touchEndY.current;
-    if (delta > 50) changeIndex("up");
-    else if (delta < -50) changeIndex("down");
+  const handleNext = () => {
+    if (activeIndex < videos.length - 1) {
+      const nextIndex = activeIndex + 1;
+      scrollToIndex(nextIndex);
+    }
   };
 
-  const swipeVariants = {
-    enter: (dir: "up" | "down") => ({
-      y: dir === "up" ? 1000 : -1000,
-      opacity: 0,
-    }),
-    center: { y: 0, opacity: 1 },
-    exit: (dir: "up" | "down") => ({
-      y: dir === "up" ? -1000 : 1000,
-      opacity: 0,
-    }),
+  const handlePrevious = () => {
+    if (activeIndex > 0) {
+      const prevIndex = activeIndex - 1;
+      scrollToIndex(prevIndex);
+    }
   };
 
-  if (!videos?.length) {
-    return <div className={styles.loading}>Loading videos...</div>;
-  }
+  const scrollToIndex = (index: number) => {
+    const container = containerRef.current;
+    if (container) {
+      const videoHeight = container.clientHeight;
+      container.scrollTo({ top: index * videoHeight, behavior: "smooth" });
+      setActiveIndex(index);
+    }
+  };
 
   return (
     <div
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+      ref={containerRef}
+      onScroll={handleScroll}
       style={{
         height: "100vh",
-        width: "100vw",
-        background: "black",
-        overflow: "hidden",
-        position: "relative",
+        overflowY: "scroll",
+        scrollSnapType: "y mandatory",
       }}
     >
-      <AnimatePresence mode="wait" custom={direction}>
-        <motion.div
-          key={index}
-          variants={swipeVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          custom={direction}
-          transition={{ duration: 0.5 }}
+      {videos.map((video, idx) => (
+        <div
+          key={video.id}
           style={{
-            height: "100%",
-            width: "100%",
-            position: "absolute",
+            height: "100vh",
+            scrollSnapAlign: "start",
+            position: "relative", // needed to absolutely position buttons
           }}
         >
-          <VideoSwipeButtons
-            onNext={() => changeIndex("up")}
-            onPrevious={() => changeIndex("down")}
-          />
+          <VideoSwipeButtons onNext={handleNext} onPrevious={handlePrevious} />
+          {/* Video UI */}
           <VideoCard
-            ref={(el) => {
-              videoRefs.current[index] = el
-            }}
-            video={videos[index]}
+            video={video}
+            isActive={idx === activeIndex}
+            ref={idx === activeIndex ? currentVideoRef : null}
           />
-          <ActionButtons
-            likes={videos[index].likes}
-            comments={videos[index].comments}
-          />
-        </motion.div>
-      </AnimatePresence>
+
+          <ActionButtons likes={video.likes} comments={video.comments} />
+        </div>
+      ))}
     </div>
   );
 };
+
+export default SwipeContainer;

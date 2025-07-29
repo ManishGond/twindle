@@ -1,21 +1,14 @@
 import axios from "axios";
 import type { Video } from "./data";
 
-interface FetchVideoResponse {
-  videos: Video[];
-  nextCursor: string | null;
-}
+const BASE_URL = "http://localhost:5000";
 
-export const fetchVideos = async (
-  cursor: string | null
-): Promise<FetchVideoResponse> => {
+export const fetchVideos = async (): Promise<Video[]> => {
   try {
-    const response = await axios.get("/api/videos", {
-      params: cursor ? { cursor } : {},
-    });
-    return response.data;
+    const res = await axios.get<Video[]>(`${BASE_URL}/api/videos`);
+    return res.data;
   } catch (error) {
-    console.error("Error fetching videos:", error);
-    return { videos: [], nextCursor: null };
+    console.error("Failed to fetch videos:", error);
+    return [];
   }
 };

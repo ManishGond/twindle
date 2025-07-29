@@ -11,7 +11,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomeFeed />} />
-          <Route path="shorts" element={<ShortsFeed />} />
+          <Route path="/shorts" element={<ShortsFeed />} />
+          <Route path="/shorts/:id" element={<ShortsFeed />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -2,14 +2,15 @@
 import {
   S3Client,
   PutObjectCommandInput,
-  ObjectCannedACL,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const s3Client = new S3Client({
+export const s3Client = new S3Client({
   region: "us-east-005",
   endpoint: "https://s3.us-east-005.backblazeb2.com",
   credentials: {
@@ -36,7 +37,21 @@ export const uploadToB2 = async (
     params: uploadParams,
   });
 
-  const result = await upload.done();
+  await upload.done();
 
-  return `https://${process.env.B2_BUCKET_NAME}.s3.us-east-005.backblazeb2.com/${fileName}`;
+  // Save only the key in DB, not full URL
+  return fileName;
+};
+
+export const getSignedVideoUrl = async (fileKey: string): Promise<string> => {
+  const command = new GetObjectCommand({
+    Bucket: process.env.B2_BUCKET_NAME!,
+    Key: fileKey,
+  });
+
+  const signedUrl = await getSignedUrl(s3Client, command, {
+    expiresIn: 3600, // 1 hour
+  });
+
+  return signedUrl;
 };
