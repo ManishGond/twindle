@@ -127,3 +127,12 @@
   margin-right: 10px;
   color: #00ff88; /* Neon green for online */
 }
+
+.systemMessage {
+  color: #888;
+  font-style: italic;
+  margin: 4px 0;
+  text-align: center;
+  font-size: 13px;
+}
+

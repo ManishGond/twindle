@@ -14,12 +14,20 @@ const setupChatSocket = (io: Server) => {
   io.on("connection", (socket: Socket) => {
     console.log("User connected:", socket.id);
 
-    socket.on("join_room", ({ roomId, username }) => {
+    socket.on("join_room", async ({ roomId, username }) => {
       socket.join(roomId);
       socketIdToUser[socket.id] = { username, roomId };
 
       if (!onlineUsers[roomId]) onlineUsers[roomId] = new Set();
       onlineUsers[roomId].add(username);
+
+      // ✅ Send last 50 messages
+      const messages = await prisma.chatMessage.findMany({
+        where: { roomId },
+        orderBy: { createdAt: "asc" },
+        take: 50,
+      });
+      socket.emit("chat_history", messages);
 
       io.to(roomId).emit("room_users", Array.from(onlineUsers[roomId]));
       io.to(roomId).emit("system_message", `${username} joined the room`);
@@ -34,21 +42,29 @@ const setupChatSocket = (io: Server) => {
         },
       });
 
+      // ✅ Limit to 50 messages per room
+      const allMessages = await prisma.chatMessage.findMany({
+        where: { roomId: msg.roomId },
+        orderBy: { createdAt: "desc" },
+        skip: 50,
+      });
+
+      if (allMessages.length > 0) {
+        const idsToDelete = allMessages.map((m) => m.id);
+        await prisma.chatMessage.deleteMany({
+          where: { id: { in: idsToDelete } },
+        });
+      }
+
       io.to(msg.roomId).emit("receive_message", msg);
     });
 
-    socket.on("leave_room", ({ roomId, username }) => {
+    socket.on("leave_room", ({ roomId }) => {
       socket.leave(roomId);
-      if (onlineUsers[roomId]) {
-        onlineUsers[roomId].delete(username);
-        io.to(roomId).emit("room_users", Array.from(onlineUsers[roomId]));
-        io.to(roomId).emit("system_message", `${username} left the room`);
-      }
-
-      delete socketIdToUser[socket.id];
+      socket.disconnect(); // 👈 Triggers disconnecting logic
     });
 
-    socket.on("disconnecting", () => {
+    socket.on("disconnecting", async () => {
       const userData = socketIdToUser[socket.id];
       if (!userData) return;
 
@@ -58,6 +74,11 @@ const setupChatSocket = (io: Server) => {
         onlineUsers[roomId].delete(username);
         io.to(roomId).emit("room_users", Array.from(onlineUsers[roomId]));
         io.to(roomId).emit("system_message", `${username} left the room`);
+
+        if (onlineUsers[roomId].size === 0) {
+          delete onlineUsers[roomId];
+          await prisma.chatMessage.deleteMany({ where: { roomId } });
+        }
       }
 
       delete socketIdToUser[socket.id];

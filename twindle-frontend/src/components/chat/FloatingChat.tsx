@@ -10,7 +10,6 @@ import {
   toggleChat,
   leaveRoom,
 } from "../../features/chat/chatSlice";
-import axios from "axios";
 import { socket } from "../../utils/socket";
 import { FaMessage } from "react-icons/fa6";
 
@@ -33,32 +32,30 @@ const FloatingChat = () => {
 
     socket.emit("join_room", { roomId, username });
 
-    axios.get(`/api/chat/${roomId}/messages`).then((res) => {
-      res.data.forEach((msg: any) => dispatch(addMessage(msg)));
-    });
-
     const handleMessage = (msg: any) => dispatch(addMessage(msg));
     const handleSystemMsg = (msg: string) =>
       dispatch(addMessage({ sender: "System", content: msg }));
     const handleRoomUsers = (users: string[]) => setOnlineUsers(users);
+    const handleHistory = (msgs: any[]) => msgs.forEach((msg) => dispatch(addMessage(msg)));
 
     socket.on("receive_message", handleMessage);
     socket.on("system_message", handleSystemMsg);
     socket.on("room_users", handleRoomUsers);
+    socket.on("chat_history", handleHistory);
 
     return () => {
       if (!hasLeft.current) {
         socket.emit("leave_room", { roomId, username });
-        hasLeft.current = true;
       }
 
       socket.off("receive_message", handleMessage);
       socket.off("system_message", handleSystemMsg);
       socket.off("room_users", handleRoomUsers);
+      socket.off("chat_history", handleHistory);
+
       hasJoined.current = false;
       hasLeft.current = false;
     };
-
   }, [roomId, view, user]);
 
   // ✅ Auto-scroll to bottom
