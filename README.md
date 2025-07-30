@@ -71,15 +71,6 @@
 
 ---
 
-## 🧪 Getting Started
-
-### 📦 Prerequisites
-- Node.js v18+
-- MongoDB or Postgres instance
-- Cloudinary account for video hosting
-
----
-
 ## 🔐 Roles
 - Creator: Upload videos
 
