@@ -20,10 +20,10 @@ const FloatingChat = () => {
   const [message, setMessage] = useState("");
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const hasJoined = useRef(false); // ✅ To prevent re-joining
+  const hasJoined = useRef(false);
   const hasLeft = useRef(false);
+  const [joinError, setJoinError] = useState("");
 
-  // ✅ Join room + fetch messages + set up listeners
   useEffect(() => {
     if (view !== "chat" || !roomId || !user?.email || hasJoined.current) return;
 
@@ -32,33 +32,36 @@ const FloatingChat = () => {
 
     socket.emit("join_room", { roomId, username });
 
-    const handleMessage = (msg: any) => dispatch(addMessage(msg));
-    const handleSystemMsg = (msg: string) =>
-      dispatch(addMessage({ sender: "System", content: msg }));
-    const handleRoomUsers = (users: string[]) => setOnlineUsers(users);
-    const handleHistory = (msgs: any[]) => msgs.forEach((msg) => dispatch(addMessage(msg)));
+    socket.on("error_join", (errMsg: string) => {
+      setJoinError(errMsg);
+      dispatch(setView("join"));
+    });
 
-    socket.on("receive_message", handleMessage);
-    socket.on("system_message", handleSystemMsg);
-    socket.on("room_users", handleRoomUsers);
-    socket.on("chat_history", handleHistory);
+    socket.on("receive_message", (msg) => dispatch(addMessage(msg)));
+    socket.on("system_message", (msg: string) =>
+      dispatch(addMessage({ sender: "System", content: msg }))
+    );
+    socket.on("room_users", (users: string[]) => setOnlineUsers(users));
+    socket.on("chat_history", (msgs: any[]) =>
+      msgs.forEach((msg) => dispatch(addMessage(msg)))
+    );
 
     return () => {
       if (!hasLeft.current) {
         socket.emit("leave_room", { roomId, username });
       }
 
-      socket.off("receive_message", handleMessage);
-      socket.off("system_message", handleSystemMsg);
-      socket.off("room_users", handleRoomUsers);
-      socket.off("chat_history", handleHistory);
+      socket.off("receive_message");
+      socket.off("system_message");
+      socket.off("room_users");
+      socket.off("chat_history");
+      socket.off("error_join");
 
       hasJoined.current = false;
       hasLeft.current = false;
     };
   }, [roomId, view, user]);
 
-  // ✅ Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -67,12 +70,14 @@ const FloatingChat = () => {
 
   const handleJoinRoom = () => {
     if (roomId.trim()) {
+      setJoinError("");
       dispatch(setView("chat"));
     }
   };
 
   const handleCreateRoom = () => {
     const newRoomId = crypto.randomUUID().split("-")[0];
+    socket.emit("create_room", { roomId: newRoomId });
     dispatch(setRoomId(newRoomId));
     dispatch(setView("chat"));
   };
@@ -128,6 +133,7 @@ const FloatingChat = () => {
             />
             <button onClick={handleJoinRoom}>Join</button>
             <button onClick={() => dispatch(setView("default"))}>← Back</button>
+            {joinError && <p className={styles.error}>{joinError}</p>}
           </div>
         );
       case "chat":
