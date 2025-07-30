@@ -1,0 +1,129 @@
+.chatButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background-color: #ff6ee9;
+  border: none;
+  color: white;
+  padding: 16px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.chatWindow {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 400px;
+  height: 600px;
+  background: #1e1e1e; /* dark background */
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  color: white;
+}
+
+.header {
+  background: #ff6ee9;
+  color: white;
+  padding: 12px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+.chatMessages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background: #121212;
+  color: #f0f0f0;
+  font-size: 14px;
+}
+
+.chatInput {
+  display: flex;
+  border-top: 1px solid #333;
+  background: #1e1e1e;
+}
+
+.chatInput input {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  outline: none;
+  background: #2a2a2a;
+  color: white;
+}
+
+.chatInput button {
+  padding: 10px 16px;
+  background: #ff6ee9;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.chatChoice {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  background-color: #121212;
+}
+
+.chatChoice button {
+  padding: 10px 16px;
+  background-color: #2a2a2a;
+  color: white;
+  border: 1px solid #444;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.chatChoice button:hover {
+  background-color: #333;
+}
+
+.roomInput {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  flex: 1;
+  background-color: #121212;
+}
+
+.roomInput input {
+  padding: 10px;
+  font-size: 14px;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: white;
+}
+
+.roomInput button {
+  padding: 8px 16px;
+  background-color: #ff6ee9;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.onlineStatus {
+  font-size: 12px;
+  margin-left: auto;
+  margin-right: 10px;
+  color: #00ff88; /* Neon green for online */
+}

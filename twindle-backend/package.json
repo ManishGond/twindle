@@ -16,8 +16,8 @@
     "@aws-sdk/s3-request-presigner": "^3.855.0",
     "@cloudinary/react": "^1.14.3",
     "@cloudinary/url-gen": "^1.21.0",
-    "@prisma/client": "^6.12.0",
     "@types/express": "^5.0.3",
+    "@types/socket.io": "^3.0.1",
     "backblaze-b2": "^1.7.1",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
@@ -28,15 +28,17 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.18.0",
     "multer": "^2.0.2",
-    "prisma": "^6.12.0",
+    "socket.io": "^4.8.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
+    "@prisma/client": "^6.13.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
-    "@types/node": "^24.1.0"
+    "@types/node": "^24.1.0",
+    "prisma": "^6.13.0"
   }
 }

@@ -4,6 +4,10 @@ import cors from "cors";
 import videoRoutes from "./routes/videoRoutes";
 import authLimiter from "./middleware/rateLimiter";
 import authRoutes from "./routes/authRoutes";
+import { Server } from "socket.io";
+import { createServer } from "http";
+import setupChatSocket from "./socket/chatSocket"; // ✅ import
+import chatRoutes from "./routes/chatRoutes";
 
 dotenv.config();
 
@@ -13,10 +17,24 @@ app.use(express.json());
 
 // Routes
 app.use("/api/videos", videoRoutes);
-app.use("/api/auth", authLimiter, authRoutes)
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/chat", chatRoutes)
 app.use("/uploads", express.static("uploads"));
 
+const httpServer = createServer(app);
+// Create Socket.IO server
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+// Call socket handler
+setupChatSocket(io); // ✅ mount chat logic
+
+// Server listener
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+httpServer.listen(PORT, () => {
+  console.log(`🚀 Server and WebSocket are running on port ${PORT}`);
 });

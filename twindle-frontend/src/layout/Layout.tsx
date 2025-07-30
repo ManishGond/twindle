@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Navbar } from "../components/navbar/Navbar";
 import { Sidebar } from "../components/sidebar/Sidebar";
+import FloatingChat from "../components/chat/FloatingChat";
 
 export const Layout = () => {
   const location = useLocation();
@@ -27,6 +28,7 @@ export const Layout = () => {
           <Outlet />
         </div>
       </div>
+      <FloatingChat />
     </div>
   );
 };

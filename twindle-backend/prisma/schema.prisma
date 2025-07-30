@@ -54,6 +54,14 @@ model Video {
   updatedAt DateTime @updatedAt
 }
 
+model ChatMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  sender    String
+  content   String
+  createdAt DateTime @default(now())
+}
+
 model Comment {
   id       String @id @default(uuid())
   text     String
