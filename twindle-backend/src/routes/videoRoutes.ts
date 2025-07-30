@@ -5,9 +5,11 @@ import { uploadVideo } from "../controller/videoController";
 import { fetchVideos } from "../controller/fetchVideos";
 
 const videoRouter = express.Router();
-const upload = multer(); // Handles multipart form-data
+const upload = multer({ dest: "uploads/" }); // saves to temp folder
 
-videoRouter.get("/", fetchVideos)
-videoRouter.post("/upload", authenticate, upload.single("video"), uploadVideo);
+videoRouter.get("/", fetchVideos);
+
+// ✅ Accepts both "video" and "thumbnail" fields from form-data
+videoRouter.post("/upload", authenticate, upload.any(), uploadVideo);
 
 export default videoRouter;

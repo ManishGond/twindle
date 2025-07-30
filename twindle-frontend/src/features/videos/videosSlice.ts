@@ -3,26 +3,32 @@ import type { Video } from "../../utils/data";
 
 interface VideosState {
   videos: Video[];
+  lastUpdated: number | null;
 }
 
 const initialState: VideosState = {
-  videos: JSON.parse(localStorage.getItem("videos") || "[]"),
+  videos: [],
+  lastUpdated: null,
 };
 
 const videoSlice = createSlice({
   name: "videos",
   initialState,
   reducers: {
-    setVideos(state, action: PayloadAction<Video[]>) {
+    setVideos: (state, action: PayloadAction<Video[]>) => {
       state.videos = action.payload;
-      localStorage.setItem("videos", JSON.stringify(action.payload));
+      state.lastUpdated = Date.now();
     },
-    addVideo(state, action: PayloadAction<Video>) {
+    clearVideos: (state) => {
+      state.videos = [];
+      state.lastUpdated = null;
+    },
+    addVideo: (state, action: PayloadAction<Video>) => {
       state.videos.unshift(action.payload);
-      localStorage.setItem("videos", JSON.stringify(state.videos));
+      state.lastUpdated = Date.now(); // 💡 Refresh timestamp
     },
   },
 });
 
-export const { addVideo, setVideos } = videoSlice.actions;
+export const { clearVideos, setVideos, addVideo } = videoSlice.actions;
 export default videoSlice.reducer;

@@ -1,58 +1,86 @@
 import { Request, Response } from "express";
-import { uploadToB2 } from "../utils/b2";
 import { prisma } from "../lib/prisma";
+import cloudinary from "../utils/cloudinary";
+import fs from "fs/promises";
 
 export const uploadVideo = async (req: Request, res: Response) => {
   try {
-    const file = req.file;
+    const files = req.files as Express.Multer.File[];
+    const videoFile = files?.find((file) => file.fieldname === "video");
+    const thumbnailFile = files?.find((file) => file.fieldname === "thumbnail");
     const { title, tags } = req.body;
     const creatorId = (req as any).userId;
 
-    if (!file || !title || !creatorId) {
+    if (!videoFile || !title || !creatorId) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const mimeType = file.mimetype;
-    const fileName = `${Date.now()}_${file.originalname}`;
+    const videoUpload = await cloudinary.uploader.upload(videoFile.path, {
+      resource_type: "video",
+      folder: "twindle_videos",
+    });
 
-    // Upload to Backblaze B2
-    const videoUrl = await uploadToB2(file.buffer, fileName, mimeType);
+    let thumbnailUrl: string;
+    let cloudinaryThumbId: string;
 
-    // Parse tags from comma-separated string
+    if (thumbnailFile) {
+      const thumbUpload = await cloudinary.uploader.upload(thumbnailFile.path, {
+        resource_type: "image",
+        folder: "twindle_thumbnails",
+      });
+      thumbnailUrl = thumbUpload.secure_url;
+      cloudinaryThumbId = thumbUpload.public_id;
+
+      await fs.unlink(thumbnailFile.path);
+    } else {
+      thumbnailUrl = cloudinary.url(`${videoUpload.public_id}.jpg`, {
+        resource_type: "video",
+        format: "jpg",
+        start_offset: "1",
+        secure: true,
+      });
+      cloudinaryThumbId = `${videoUpload.public_id}.jpg`;
+    }
+
+    await fs.unlink(videoFile.path);
+
     const tagArray =
       typeof tags === "string"
         ? tags.split(",").map((tag) => ({ tag: tag.trim() }))
         : [];
 
-    // Create video with tags and connect to creator
     const video = await prisma.video.create({
       data: {
         title,
-        videoUrl,
+        videoUrl: videoUpload.secure_url,
+        cloudinaryPublicId: videoUpload.public_id,
+        thumbnailUrl,
+        cloudinaryThumbId,
         creator: {
           connect: { id: creatorId },
         },
         tags: {
-          create: tagArray, // One-to-many creation
+          create: tagArray,
         },
       },
       include: {
         tags: true,
+        creator: true
       },
     });
 
-    return res.status(201).json({
-      message: "Video uploaded!",
-      video: {
-        id: video.id,
-        title: video.title,
-        url: video.videoUrl,
-        tags: video.tags.map((t) => t.tag),
-        createdAt: video.createdAt,
+    // ✅ Fetch creator info separately
+    const creator = await prisma.user.findUnique({
+      where: { id: creatorId },
+      select: {
+        id: true,
+        name: true,
+        avatar: true,
       },
     });
+    return res.status(201).json(video);
   } catch (err) {
-    console.error("Upload error:", err);
+    console.error("❌ Upload error:", err);
     return res.status(500).json({ error: "Failed to upload video." });
   }
 };

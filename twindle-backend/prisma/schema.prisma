@@ -32,8 +32,13 @@ model User {
 }
 
 model Video {
-  id       String @id @default(uuid())
-  videoUrl String
+  id                 String @id @default(uuid())
+  videoUrl           String
+  cloudinaryPublicId String
+
+  thumbnailUrl      String // 🔥 New
+  cloudinaryThumbId String // 🔥 New
+
   title    String
   likes    Int    @default(0)
   dislikes Int    @default(0)
@@ -43,7 +48,7 @@ model Video {
   creator   User       @relation("CreatorVideos", fields: [creatorId], references: [id])
   tags      VideoTag[]
   curations Curation[]
-  comments  Comment[] // ✅ valid relation now
+  comments  Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

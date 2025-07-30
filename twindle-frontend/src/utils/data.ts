@@ -1,6 +1,7 @@
-export type Video = {
+export interface Video {
   id: string;
   videoUrl: string;
+  thumbnailUrl: string;
   title: string;
   tags: string[];
   likes: number;

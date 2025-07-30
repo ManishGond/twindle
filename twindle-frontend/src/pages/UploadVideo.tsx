@@ -2,17 +2,25 @@ import React, { useState, useRef } from "react";
 import styles from "../styles/UploadVideo.module.css";
 import { uploadVideo } from "../utils/api";
 import { getAuth } from "../utils/auth";
+import { useDispatch } from "react-redux";
+import { addVideo } from "../features/videos/videosSlice"; // ✅ Added import
+import type { AppDispatch } from "../store/store";
 
 const UploadVideo = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [thumbPreviewUrl, setThumbPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbInputRef = useRef<HTMLInputElement>(null);
+
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -22,9 +30,17 @@ const UploadVideo = () => {
     }
   };
 
+  const handleThumbChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected) {
+      setThumbnail(selected);
+      setThumbPreviewUrl(URL.createObjectURL(selected));
+    }
+  };
+
   const handleUpload = async () => {
     if (!title || !file) {
-      setMessage("Title and video file are required.");
+      setMessage("❌ Title and video file are required.");
       return;
     }
 
@@ -41,19 +57,30 @@ const UploadVideo = () => {
     formData.append("description", description);
     formData.append("tags", tags);
     formData.append("video", file);
+    if (thumbnail) {
+      formData.append("thumbnail", thumbnail);
+    }
 
     try {
       setUploading(true);
-      await uploadVideo(formData, token);
+      const newVideo = await uploadVideo(formData, token);
+
+      // ✅ Add the new video to Redux store
+      dispatch(addVideo(newVideo));
+
       setMessage("✅ Upload successful!");
+
+      // Reset form
       setTitle("");
       setDescription("");
       setTags("");
       setFile(null);
       setPreviewUrl(null);
+      setThumbnail(null);
+      setThumbPreviewUrl(null);
     } catch (err) {
       console.error(err);
-      setMessage("❌ Upload failed.");
+      setMessage("❌ Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -64,6 +91,7 @@ const UploadVideo = () => {
       <h2 className={styles.headerText}>Upload</h2>
 
       <div className={styles.uploadContainer}>
+        {/* Left: Video Upload */}
         <div
           className={styles.leftSection}
           onClick={() => fileInputRef.current?.click()}
@@ -85,7 +113,7 @@ const UploadVideo = () => {
           />
         </div>
 
-        {/* Form Inputs */}
+        {/* Right: Form + Thumbnail */}
         <div className={styles.rightSection}>
           <input
             type="text"
@@ -109,6 +137,32 @@ const UploadVideo = () => {
             onChange={(e) => setTags(e.target.value)}
             className={styles.input}
           />
+
+          {/* Thumbnail Upload */}
+          <div
+            className={styles.thumbnailUpload}
+            onClick={() => thumbInputRef.current?.click()}
+          >
+            {thumbPreviewUrl ? (
+              <img
+                src={thumbPreviewUrl}
+                alt="Thumbnail"
+                className={styles.thumbPreview}
+              />
+            ) : (
+              <div className={styles.thumbPlaceholder}>
+                Click to upload thumbnail<br />
+                (optional)
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              ref={thumbInputRef}
+              onChange={handleThumbChange}
+              className={styles.hiddenInput}
+            />
+          </div>
 
           <button
             onClick={handleUpload}
