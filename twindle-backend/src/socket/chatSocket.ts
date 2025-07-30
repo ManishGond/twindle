@@ -8,13 +8,15 @@ interface ChatMessage {
 }
 
 const onlineUsers: Record<string, Set<string>> = {};
+const socketIdToUser: Record<string, { username: string; roomId: string }> = {};
 
 const setupChatSocket = (io: Server) => {
   io.on("connection", (socket: Socket) => {
     console.log("User connected:", socket.id);
 
-    socket.on("join_room", async ({ roomId, username }) => {
+    socket.on("join_room", ({ roomId, username }) => {
       socket.join(roomId);
+      socketIdToUser[socket.id] = { username, roomId };
 
       if (!onlineUsers[roomId]) onlineUsers[roomId] = new Set();
       onlineUsers[roomId].add(username);
@@ -37,20 +39,28 @@ const setupChatSocket = (io: Server) => {
 
     socket.on("leave_room", ({ roomId, username }) => {
       socket.leave(roomId);
+      if (onlineUsers[roomId]) {
+        onlineUsers[roomId].delete(username);
+        io.to(roomId).emit("room_users", Array.from(onlineUsers[roomId]));
+        io.to(roomId).emit("system_message", `${username} left the room`);
+      }
+
+      delete socketIdToUser[socket.id];
+    });
+
+    socket.on("disconnecting", () => {
+      const userData = socketIdToUser[socket.id];
+      if (!userData) return;
+
+      const { username, roomId } = userData;
 
       if (onlineUsers[roomId]) {
         onlineUsers[roomId].delete(username);
         io.to(roomId).emit("room_users", Array.from(onlineUsers[roomId]));
         io.to(roomId).emit("system_message", `${username} left the room`);
       }
-    });
 
-    socket.on("disconnecting", () => {
-      for (const roomId of socket.rooms) {
-        if (onlineUsers[roomId]) {
-          // NOTE: You’d ideally track socket ↔ username to clean this up properly
-        }
-      }
+      delete socketIdToUser[socket.id];
     });
   });
 };

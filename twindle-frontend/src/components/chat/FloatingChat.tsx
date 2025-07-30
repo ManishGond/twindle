@@ -21,12 +21,15 @@ const FloatingChat = () => {
   const [message, setMessage] = useState("");
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasJoined = useRef(false); // ✅ To prevent re-joining
+  const hasLeft = useRef(false);
 
   // ✅ Join room + fetch messages + set up listeners
   useEffect(() => {
-    if (view !== "chat" || !roomId) return;
+    if (view !== "chat" || !roomId || !user?.email || hasJoined.current) return;
 
-    const username = user?.email || "Anonymous";
+    const username = user.email;
+    hasJoined.current = true;
 
     socket.emit("join_room", { roomId, username });
 
@@ -35,7 +38,8 @@ const FloatingChat = () => {
     });
 
     const handleMessage = (msg: any) => dispatch(addMessage(msg));
-    const handleSystemMsg = (msg: string) => dispatch(addMessage({ sender: "System", content: msg }));
+    const handleSystemMsg = (msg: string) =>
+      dispatch(addMessage({ sender: "System", content: msg }));
     const handleRoomUsers = (users: string[]) => setOnlineUsers(users);
 
     socket.on("receive_message", handleMessage);
@@ -43,11 +47,18 @@ const FloatingChat = () => {
     socket.on("room_users", handleRoomUsers);
 
     return () => {
-      socket.emit("leave_room", { roomId, username });
+      if (!hasLeft.current) {
+        socket.emit("leave_room", { roomId, username });
+        hasLeft.current = true;
+      }
+
       socket.off("receive_message", handleMessage);
       socket.off("system_message", handleSystemMsg);
       socket.off("room_users", handleRoomUsers);
+      hasJoined.current = false;
+      hasLeft.current = false;
     };
+
   }, [roomId, view, user]);
 
   // ✅ Auto-scroll to bottom
@@ -55,9 +66,7 @@ const FloatingChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleToggleChat = () => {
-    dispatch(toggleChat());
-  };
+  const handleToggleChat = () => dispatch(toggleChat());
 
   const handleJoinRoom = () => {
     if (roomId.trim()) {
@@ -72,26 +81,25 @@ const FloatingChat = () => {
   };
 
   const handleSendMessage = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !user?.email) return;
 
     const msg = {
-      sender: user?.email || "Anonymous",
+      sender: user.email,
       content: message,
       roomId,
     };
 
-    dispatch(addMessage(msg));
     socket.emit("send_message", msg);
     setMessage("");
   };
 
   const handleLeaveRoom = () => {
-    const username = user?.email || "Anonymous";
-    socket.emit("leave_room", { roomId, username });
+    if (!user?.email || hasLeft.current) return;
+    socket.emit("leave_room", { roomId, username: user.email });
+    hasLeft.current = true;
     dispatch(leaveRoom());
   };
 
-  // ✅ Render messages
   const renderMessages = () =>
     messages.map((msg, idx) => {
       const isSystem = msg.sender === "System";
@@ -99,8 +107,7 @@ const FloatingChat = () => {
 
       return (
         <p key={idx} className={isSystem ? styles.systemMessage : ""}>
-          <b>{isSystem ? "System" : isCurrentUser ? "You" : msg.sender}:</b>{" "}
-          {msg.content}
+          <b>{isSystem ? "System" : isCurrentUser ? "You" : msg.sender}:</b> {msg.content}
         </p>
       );
     });

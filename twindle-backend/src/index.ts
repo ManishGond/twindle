@@ -8,12 +8,14 @@ import { Server } from "socket.io";
 import { createServer } from "http";
 import setupChatSocket from "./socket/chatSocket"; // ✅ import
 import chatRoutes from "./routes/chatRoutes";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser())
 
 // Routes
 app.use("/api/videos", videoRoutes);
