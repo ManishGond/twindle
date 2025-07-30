@@ -13,21 +13,21 @@ const validRooms: Set<string> = new Set();
 
 const setupChatSocket = (io: Server) => {
   io.on("connection", (socket: Socket) => {
-    console.log("User connected:", socket.id);
-
     socket.on("create_room", ({ roomId }) => {
       validRooms.add(roomId);
     });
 
-    socket.on("join_room", async ({ roomId, username }) => {
-      // ✅ Reject if room does not exist or is empty
-      if (
-        !validRooms.has(roomId) ||
-        (!onlineUsers[roomId]?.size &&
-          !prisma.chatMessage.count({ where: { roomId } }))
-      ) {
-        socket.emit("error_join", "Room not found or has expired.");
-        return;
+    socket.on("join_room", async ({ roomId, username }, callback) => {
+      // 👇 Check if room is either active (onlineUsers) or was created (validRooms)
+      const isRoomValid = onlineUsers[roomId] || validRooms.has(roomId);
+      if (!isRoomValid) {
+        return callback?.({ error: "Room does not exist." });
+      }
+
+      // ✅ Remove existing mapping if user was already joined elsewhere
+      if (socketIdToUser[socket.id]) {
+        const prevRoom = socketIdToUser[socket.id].roomId;
+        onlineUsers[prevRoom]?.delete(socketIdToUser[socket.id].username);
       }
 
       socket.join(roomId);
@@ -41,10 +41,12 @@ const setupChatSocket = (io: Server) => {
         orderBy: { createdAt: "asc" },
         take: 50,
       });
-      socket.emit("chat_history", messages);
 
+      socket.emit("chat_history", messages);
       io.to(roomId).emit("room_users", Array.from(onlineUsers[roomId]));
       io.to(roomId).emit("system_message", `${username} joined the room`);
+
+      return callback?.({ success: true });
     });
 
     socket.on("send_message", async (msg: ChatMessage) => {
@@ -73,8 +75,7 @@ const setupChatSocket = (io: Server) => {
     });
 
     socket.on("leave_room", ({ roomId }) => {
-      socket.leave(roomId);
-      socket.disconnect(); // Will trigger 'disconnecting'
+      socket.disconnect(); // Triggers disconnecting — that's enough
     });
 
     socket.on("disconnecting", async () => {

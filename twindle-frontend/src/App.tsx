@@ -1,5 +1,5 @@
 // App.tsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./layout/Layout";
@@ -10,14 +10,26 @@ import UploadVideo from "./pages/UploadVideo";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { setUserFromLocalStorage } from "./features/auth/authSlice";
+import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ⚡ Runs once on app load — checks if there's a valid user in localStorage
     dispatch(setUserFromLocalStorage());
+
+    // Delay of 3 seconds
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [dispatch]);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <BrowserRouter>

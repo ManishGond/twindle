@@ -15,7 +15,9 @@ import { FaMessage } from "react-icons/fa6";
 
 const FloatingChat = () => {
   const dispatch = useDispatch();
-  const { isOpen, messages, roomId, view } = useSelector((state: RootState) => state.chat);
+  const { isOpen, messages, roomId, view } = useSelector(
+    (state: RootState) => state.chat
+  );
   const user = useSelector((state: RootState) => state.auth.user);
   const [message, setMessage] = useState("");
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
@@ -30,7 +32,17 @@ const FloatingChat = () => {
     const username = user.email;
     hasJoined.current = true;
 
-    socket.emit("join_room", { roomId, username });
+    socket.emit(
+      "join_room",
+      { roomId, username },
+      (response: { success?: boolean; error?: string }) => {
+        if (response?.error) {
+          console.error("Join failed:", response.error);
+        } else {
+          console.log("Joined successfully");
+        }
+      }
+    );
 
     socket.on("error_join", (errMsg: string) => {
       setJoinError(errMsg);
@@ -69,10 +81,12 @@ const FloatingChat = () => {
   const handleToggleChat = () => dispatch(toggleChat());
 
   const handleJoinRoom = () => {
-    if (roomId.trim()) {
-      setJoinError("");
-      dispatch(setView("chat"));
+    if (!roomId.trim()) {
+      setJoinError("Room ID cannot be empty.");
+      return;
     }
+    setJoinError("");
+    dispatch(setView("chat"));
   };
 
   const handleCreateRoom = () => {
@@ -100,6 +114,13 @@ const FloatingChat = () => {
     socket.emit("leave_room", { roomId, username: user.email });
     hasLeft.current = true;
     dispatch(leaveRoom());
+    window.location.reload(); // brute force but reliable
+  };
+
+  const handleBackToDefault = () => {
+    setJoinError("");
+    hasJoined.current = false;
+    dispatch(setView("default"));
   };
 
   const renderMessages = () =>
@@ -109,7 +130,8 @@ const FloatingChat = () => {
 
       return (
         <p key={idx} className={isSystem ? styles.systemMessage : ""}>
-          <b>{isSystem ? "System" : isCurrentUser ? "You" : msg.sender}:</b> {msg.content}
+          <b>{isSystem ? "System" : isCurrentUser ? "You" : msg.sender}:</b>{" "}
+          {msg.content}
         </p>
       );
     });
@@ -132,7 +154,7 @@ const FloatingChat = () => {
               onChange={(e) => dispatch(setRoomId(e.target.value))}
             />
             <button onClick={handleJoinRoom}>Join</button>
-            <button onClick={() => dispatch(setView("default"))}>← Back</button>
+            <button onClick={handleBackToDefault}>← Back</button>
             {joinError && <p className={styles.error}>{joinError}</p>}
           </div>
         );
@@ -140,7 +162,9 @@ const FloatingChat = () => {
         return (
           <>
             <div className={styles.header}>
-              <span>Room: <b>{roomId}</b></span>
+              <span>
+                Room: <b>{roomId}</b>
+              </span>
               <span>🟢 Online: {onlineUsers.length}</span>
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 <button onClick={handleLeaveRoom}>Leave Room</button>
@@ -150,8 +174,12 @@ const FloatingChat = () => {
 
             <div className={styles.chatMessages}>
               {messages.length === 0 ? (
-                <p><i>No messages yet...</i></p>
-              ) : renderMessages()}
+                <p>
+                  <i>No messages yet...</i>
+                </p>
+              ) : (
+                renderMessages()
+              )}
               <div ref={messagesEndRef} />
             </div>
 
