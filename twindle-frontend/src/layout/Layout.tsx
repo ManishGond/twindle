@@ -7,6 +7,7 @@ import FloatingChat from "../components/chat/FloatingChat";
 export const Layout = () => {
   const location = useLocation();
 
+  // Controls body overflow for Shorts page only
   useEffect(() => {
     if (location.pathname === "/shorts") {
       document.body.style.overflow = "hidden";
@@ -19,12 +20,20 @@ export const Layout = () => {
     };
   }, [location.pathname]);
 
+  const isSignupPage = location.pathname === "/signup";
+
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       <Navbar />
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
         <Sidebar />
-        <div style={{ flex: 1, overflow: "hidden" }}>
+        <div
+          style={{
+            flex: 1,
+            overflowY: isSignupPage ? "auto" : "hidden",
+            padding: isSignupPage ? "2rem 1rem" : "0",
+          }}
+        >
           <Outlet />
         </div>
       </div>
@@ -32,4 +41,3 @@ export const Layout = () => {
     </div>
   );
 };
-

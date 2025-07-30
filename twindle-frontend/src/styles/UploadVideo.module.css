@@ -66,7 +66,7 @@
 
 .uploadBtn {
   padding: 0.75rem;
-  background-color: #3b82f6;
+  background-color: #9a76da;
   color: white;
   border: none;
   border-radius: 8px;
@@ -79,10 +79,39 @@
 
 .message {
   margin-top: 0.5rem;
-  color: #16a34a;
+  color: #c0a0f8;
   font-size: 0.9rem;
 }
 
 .headerText{
   font-size: 24px;
+}
+
+.thumbnailUpload {
+  width: 100%;
+  max-width: 300px;
+  height: 170px;
+  border: 2px dashed #000000;
+  border-radius: 12px;
+  background-color: #cbd5e1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.thumbPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.thumbPlaceholder {
+  color: #334155;
+  font-size: 0.9rem;
+  padding: 0.5rem;
 }

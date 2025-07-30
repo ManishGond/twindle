@@ -27,7 +27,7 @@
 .sidebarItem:hover {
   background: #333;
   transform: scale(1.02);
-  border-left: 4px solid #ff4040;
+  border-left: 4px solid #684d97;
 }
 
 .sidebarItem span {

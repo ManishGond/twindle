@@ -14,7 +14,13 @@ export const ProfileDropdown = () => {
       {isAuthenticated ? (
         <>
           <p className={styles.welcome}>👋 Hello, {user?.name || "User"}</p>
-          <button className={styles.btn} onClick={() => dispatch(logout())}>
+          <button
+            className={styles.btn}
+            onClick={() => {
+              dispatch(logout());
+              window.location.href = "/"; // or window.location.reload();
+            }}
+          >
             <FaSignOutAlt /> Logout
           </button>
         </>

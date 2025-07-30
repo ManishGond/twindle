@@ -23,8 +23,8 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await loginUser(form.email, form.password); // { user, token }
-      dispatch(login(res)); // slice sets localStorage
+      const res = await loginUser(form.email, form.password);
+      dispatch(login(res));
       navigate("/");
     } catch (err) {
       console.error("Login error:", err);
@@ -36,26 +36,31 @@ const Login = () => {
 
   return (
     <div className={styles.container}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          required
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+      <div className={styles.card}>
+        <h2 className={styles.title}>Welcome Back 👋</h2>
+        <p className={styles.subtitle}>Login to your account</p>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <input
+            type="email"
+            placeholder="Email address"
+            required
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className={styles.input}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            className={styles.input}
+          />
+          <button type="submit" className={styles.button} disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

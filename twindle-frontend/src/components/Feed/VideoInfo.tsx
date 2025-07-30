@@ -33,7 +33,7 @@ export const VideoInfo = ({ video }: { video: Video }) => {
         className={styles.follow}
         onClick={handleFollowClick}
         animate={{
-          backgroundColor: isFollowing ? "#fff" : "#ff0055",
+          backgroundColor: isFollowing ? "#fff" : "#9a76da",
           color: isFollowing ? "#000" : "#fff",
           width: isFollowing ? "110px" : "80px",
         }}

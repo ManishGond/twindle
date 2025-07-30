@@ -1,7 +1,7 @@
 .container {
-  padding: 1rem;
-  max-width: 1200px;
-  margin: 0 auto; /* centers the grid */
+  padding: 1rem 2rem;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .heading {
@@ -11,20 +11,23 @@
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* match thumbnail width */
-  gap: 16px;
-  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
 }
 
 .card {
-  width: 300px;
+  flex: 1 1 280px; /* min width of 280px but grows to fill space */
+  max-width: 320px;
   background: #111;
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
   transition: transform 0.2s ease;
   border: 1px solid #333;
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
@@ -32,25 +35,29 @@
 }
 
 .thumbnail {
-  width: 340px;
-  height: 140px;
+  width: 100%;
+  height: 180px;
   object-fit: cover;
   display: block;
   background-color: #000;
 }
 
 .details {
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .title {
   color: #fff;
   font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
   margin: 0;
 }
 
 .creator {
   color: #aaa;
   font-size: 14px;
-  margin: 4px 0 0;
 }

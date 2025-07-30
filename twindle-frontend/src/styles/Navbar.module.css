@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #0f0f0f;
+  background: #684d97;
   padding: 0 16px;
   color: white;
 }
@@ -11,8 +11,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: bold;
 }
+.logoImage {
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: #0f0f0f;
+}
+
 .search {
   width: 40%;
   padding: 8px;
