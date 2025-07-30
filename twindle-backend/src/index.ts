@@ -15,12 +15,12 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Routes
 app.use("/api/videos", videoRoutes);
-app.use("/api/auth", authLimiter, authRoutes);
-app.use("/api/chat", chatRoutes)
+app.use("/api/auth", authRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/uploads", express.static("uploads"));
 
 const httpServer = createServer(app);

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { login } from "../features/auth/authSlice";
 import type { RootState } from "../store/store";
 import styles from "../styles/AuthForm.module.css";
+import { signupUser } from "../utils/api";
 
 const Signup = () => {
   const dispatch = useDispatch();
@@ -51,11 +51,8 @@ const Signup = () => {
       formData.append("isCurator", String(form.isCurator));
       if (form.avatar) formData.append("avatar", form.avatar);
 
-      const res = await axios.post("/api/auth/register", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      dispatch(login(res.data)); // { user, token }
+      const res = await signupUser(formData); // ✅ from api.ts
+      dispatch(login(res));
       navigate("/");
     } catch (err) {
       console.error("Signup error:", err);
