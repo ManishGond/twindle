@@ -2,6 +2,17 @@
 
 > A modern short-form video platform like YouTube Shorts — but with a twist: curated content, real-time group chats, and a powerful creator-curator ecosystem.
 
+## Screenshots 🖼️
+<img width="800" height="450" alt="Screenshot 2025-07-30 195259" src="https://github.com/user-attachments/assets/1096fde4-197a-4600-9877-e5171df701d9" />
+<img width="800" height="450" alt="Screenshot 2025-07-30 195328" src="https://github.com/user-attachments/assets/4be4c016-7b82-41d8-8fd8-237e2086b9d3" />
+<img width="800" height="450" alt="Screenshot 2025-07-30 195338" src="https://github.com/user-attachments/assets/4e2105e7-4f04-4eb1-8649-324d9b230553" />
+<img width="800" height="450" alt="Screenshot 2025-07-30 195829" src="https://github.com/user-attachments/assets/341d2343-6af5-4a58-a313-879021e00612" />
+<img width="800" height="450" alt="Screenshot 2025-07-30 195354" src="https://github.com/user-attachments/assets/021e29f2-7b13-4492-8e12-e6bf023a3e82" />
+<img width="800" height="450" alt="Screenshot 2025-07-30 195253" src="https://github.com/user-attachments/assets/cbd450fb-1ddf-451c-b672-321d57e7981a" />
+<img width="800" height="450" alt="Screenshot 2025-07-30 200729" src="https://github.com/user-attachments/assets/834f501d-0558-4abe-b3f7-9a8e665fdbd6" />
+
+
+
 ## 🚀 Features
 
 ### 🎥 Short-Form Video Feed
@@ -20,7 +31,7 @@
 ### 💬 Real-Time Group Chat
 - Socket.IO powered live chat rooms
 - Auto-scroll, join/leave messages, and online user tracking
-- Session cookies for reconnection support
+- Session stored temp untill all the users leave the room
 - Messages persist as long as any user stays in the room
 - Auto-deletion of room/messages when all users leave
 
